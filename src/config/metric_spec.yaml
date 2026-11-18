@@ -1,5 +1,5 @@
 # Lab 9 metric spec. Same eval-set version => thresholds may only get stricter (ratchet).
-metric_spec_version: "1.0"
+metric_spec_version: "1.1"   # 1.1: + host_decision_kept (stricter only)
 eval_set_version: v1
 eval_set: data/eval/eval_set_v1.jsonl
 labels: data/eval/labels_v1.json          # labels never inline in items
@@ -15,4 +15,10 @@ metrics:
      threshold: {min: 0.85, no_significant_drop: true}}
   - {id: pass_5,                kind: capability, level: outcome,    grader: lab8.metrics.summarize, threshold: {min: 0.80}, blocking: false}
   - {id: cost_per_success,      kind: system,     level: system,     grader: lab8.metrics.summarize, threshold: {max_increase: 0.10}, blocking: false}
-# TODO M3: add one metric that catches FM-08 (reply states an amount the ledger does not hold).
+  # M3 / FM-08 misreport: every amount the reply states must equal the ledger (lab9.graders.ReplyMatchesLedger).
+  # Lab 8's trial_pass does not read the reply, so probe_misreport scores pass_rate 1.0 and only this catches it.
+  # Floor 1.0: a wrong amount told to a customer is never acceptable, and MockLLM baseline/fixed sit at 1.0.
+  - {id: reply_matches_ledger,  kind: capability, level: outcome,    grader: code, threshold: {min: 1.0}, blocking: true}
+  # Host owns money decisions: its audit trail (policy_denied, committed refunds) must match the label.
+  # Catches an agent that denies on its own without asking the host (seeded_regression C-013, FM-05/FM-02).
+  - {id: host_decision_kept,    kind: capability, level: trajectory, grader: code, threshold: {min: 0.95}, blocking: true}

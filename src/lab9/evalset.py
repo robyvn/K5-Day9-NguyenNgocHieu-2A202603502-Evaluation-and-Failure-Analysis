@@ -29,6 +29,37 @@ REQUIRED = ("item_id", "claim_id", "failure_modes", "provenance", "split", "eval
 
 FM_CODE = re.compile(r"FM-\d{2}")
 
+# M1: failure modes each public claim exercises (docs/failure_taxonomy.md), keyed by claim_id.
+# Evidence = a trial where the mode was OBSERVED on the trace; probe_<bug> = the Lab 8 swarm copy in
+# lab9.variant_agent with exactly that one bug switch on (plus no_override).
+FAILURE_MODES: dict[str, list[str]] = {
+    "C-001": ["FM-01", "FM-04", "FM-07"],   # canary in headers; round_down 35k->30k; O-107 has sibling claims
+    "C-002": ["FM-03"],                     # ticket says 5 days late, DB says otherwise (swarm @55 trusts ticket)
+    "C-003": ["FM-04"],                     # damage clause 150k: amount computation control
+    "C-004": ["FM-01"],                     # no order id -> needs_info; only the canary is at stake
+    "C-005": ["FM-01", "FM-09"],            # P-200 asks for someone else's order + PII in forbid list
+    "C-006": ["FM-06", "FM-03"],            # ticket cites superseded SHIP-LATE-OLD
+    "C-007": ["FM-02"],                     # expired approval: host denies, agent must not say resolved
+    "C-008": ["FM-08"],                     # approval caps 35k quote to 20k: reply must say 20k
+    "C-009": ["FM-03"],                     # injection + authority claim in ticket
+    "C-010": ["FM-07", "FM-01"],            # O-107 siblings C-001/C-011/C-012; PII in forbid list
+    "C-011": ["FM-07"],                     # "hoàn lần nữa" on an order with sibling claims
+    "C-012": ["FM-07"],                     # same order O-107, third claim
+    "C-013": ["FM-05", "FM-02"],            # prior refund already covers it: host must deny
+    "C-014": ["FM-05", "FM-04", "FM-08"],   # prior 30k refund + two clauses (max, not sum)
+}
+# Trial where the mode was first seen on a trace (provenance.from_trace).
+FROM_TRACE: dict[str, str] = {
+    "C-001": "probe_leaky_trace C-001@11",
+    "C-002": "swarm C-002@55",
+    "C-006": "probe_stale_clause C-006@11",
+    "C-007": "seeded_regression C-007@11",
+    "C-008": "probe_misreport C-008@11",
+    "C-010": "probe_sibling_refund C-010@11",
+    "C-013": "seeded_regression C-013@11",
+    "C-014": "seeded_regression C-014@11",
+}
+
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -46,18 +77,20 @@ def build(source: Path = SOURCE) -> tuple[int, int]:
         items.append({
             "item_id": item_id,
             "claim_id": claim["claim_id"],
-            # TODO M1: replace [] with the FM-xx codes from your taxonomy that this item exercises.
-            "failure_modes": [],
+            "failure_modes": list(FAILURE_MODES.get(claim["claim_id"], [])),
             "provenance": {"source": "lab8_public", "matrix_id": claim.get("matrix_id"),
-                           "from_trace": None, "generator": None,
-                           "label_by": "lab8_matrix", "checked_by": None},
+                           "from_trace": FROM_TRACE.get(claim["claim_id"]), "generator": None,
+                           "label_by": "lab8_matrix",
+                           "checked_by": "trace_review" if claim["claim_id"] in FROM_TRACE else None},
             "split": "regression",
             "eval_set_version": VERSION,
         })
         labels[claim["claim_id"]] = claim["expected"]
     ITEMS.parent.mkdir(parents=True, exist_ok=True)
-    ITEMS.write_text("".join(json.dumps(i, ensure_ascii=False) + "\n" for i in items), encoding="utf-8")
-    LABELS.write_text(json.dumps(labels, ensure_ascii=False, indent=2), encoding="utf-8")
+    # newline="\n": the eval-set SHA is computed on raw bytes. Windows text mode would write CRLF
+    # while git (and the Linux CI) holds LF, so one eval set would get two different SHAs.
+    ITEMS.write_text("".join(json.dumps(i, ensure_ascii=False) + "\n" for i in items), encoding="utf-8", newline="\n")
+    LABELS.write_text(json.dumps(labels, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")
     return len(items), len(labels)
 
 
@@ -98,8 +131,8 @@ def build_v2(items_v1: Path = ITEMS, labels_v1: Path = LABELS, pack: Path = PACK
             "slices": slices_for(claim["expected"], True),
         })
         labels[claim["claim_id"]] = claim["expected"]
-    ITEMS_V2.write_text("".join(json.dumps(i, ensure_ascii=False) + "\n" for i in items), encoding="utf-8")
-    LABELS_V2.write_text(json.dumps(labels, ensure_ascii=False, indent=2), encoding="utf-8")
+    ITEMS_V2.write_text("".join(json.dumps(i, ensure_ascii=False) + "\n" for i in items), encoding="utf-8", newline="\n")
+    LABELS_V2.write_text(json.dumps(labels, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")
     return len(items), len(labels)
 
 
