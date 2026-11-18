@@ -2,8 +2,8 @@
 
 Card này đi kèm mỗi báo cáo và được dùng lại ở Day 10. Mọi con số dưới đây lấy từ report do `python -m lab9.eval` sinh ra (không gõ tay); sinh lại bằng các lệnh ở mục cuối.
 
-- **Run ID / eval set SHA:** baseline `E-swarm-20261117-5a46` · PR `E-fixed-20261117-5a46`, `E-seeded_regression-20261117-5a46` · eval set `5a463265e6aa`
-- **Phiên bản:** code + grader trên nhánh `starter/d09` (Lab 8 overlay `cd0ecd4` từ repo nhóm `f1d468e`; M5–M7 ở commit sau `11d2fd6`) · eval set v1 (sha `5a463265e6aa`) · metric_spec `1.1` (1.0 + `host_decision_kept`, chỉ chặt hơn) · seeds 11/22/33/44/55 · MockLLM · Python 3.15.2
+- **Run ID / eval set SHA:** baseline `E-swarm-20261118-6743` · PR `E-fixed-20261118-6743`, `E-seeded_regression-20261118-6743` · eval set `67438c06aa47`
+- **Phiên bản:** code + grader trên nhánh `starter/d09` (Lab 8 overlay `cd0ecd4` từ repo nhóm `f1d468e`; M5–M7 ở commit sau `11d2fd6`) · eval set v1 (sha `67438c06aa47`) · metric_spec `1.1` (1.0 + `host_decision_kept`, chỉ chặt hơn) · seeds 11/22/33/44/55 · MockLLM · Python 3.15.2
 - **Eval set:** v1, 14 item × 5 seed = 70 trial, nguồn `lab8_public` (ma trận T01–T14). Nhãn tách riêng trong `data/eval/labels_v1.json`. Mỗi item có `failure_modes` (FM-01…FM-09) và `provenance`; 8/14 item có `from_trace` dẫn về trial đã quan sát lỗi.
 - **Shape được đo:** `swarm` (= `lab8/shapes/swarm_reference.py` của giảng viên), không phải shape nhóm tự viết.
 
@@ -83,7 +83,7 @@ Claim hoàn phí ship do giao trễ và bồi thường hàng hỏng đã xác m
 
 ## v2 (M5–M7): slice, độ tin cậy, chống gian lận eval
 
-- **Run ID / eval set:** baseline `E-swarm-20261117-113b` · eval set v2 sha `113b33229f2a` · metric_spec `2.0` (`config/metric_spec_v2.yaml`)
+- **Run ID / eval set:** baseline `E-swarm-20261118-4c82` · eval set v2 sha `4c8229fd5d6f` · metric_spec `2.0` (`config/metric_spec_v2.yaml`)
 - **Eval set v2:** 28 item = 14 item v1 + 14 claim tấn công (`adversarial_v2.json`). Mọi cơ chế map sang FM qua `config/fm_map.yaml`. Mỗi FM bị tấn công có ≥ 3 item (FM-02: 4, FM-03: 5, FM-04: 5, FM-05: 5, FM-06: 3, FM-07: 5, FM-08: 4, FM-09: 4). Slice tag lấy từ **nhãn**, không từ output: `money_movement` 12 item, `adversarial` 14, `denial` 11, `escalation` 4.
 
 ### Ngưỡng chọn từ A/A (M6)

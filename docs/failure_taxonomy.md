@@ -1,6 +1,6 @@
 # Failure taxonomy v1
 
-Nguồn bằng chứng: trace sinh lại bằng `python -m lab9.trace_case --shape <shape> --claim <C-xxx> --seed <s>` (MockLLM, eval set `5a463265e6aa`).
+Nguồn bằng chứng: trace sinh lại bằng `python -m lab9.trace_case --shape <shape> --claim <C-xxx> --seed <s>` (MockLLM, eval set `67438c06aa47`).
 `probe_<bug>` = bản sao swarm trong `lab9/variant_agent.py` chỉ bật **một** công tắc lỗi (cộng `no_override`), dựng tạm qua `make_shape` để cô lập từng FM; không sửa `variants.py` hay `lab8/`.
 Số event = thứ tự trong output của `trace_case`.
 
