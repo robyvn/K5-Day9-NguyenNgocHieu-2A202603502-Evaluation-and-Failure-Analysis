@@ -1,4 +1,4 @@
 # The eval set and labels are hashed byte-for-byte (manifest.eval_set_sha). Keep them LF on every
 # platform so a Windows checkout and the Linux CI hash the same bytes.
-src/data/** text eol=lf
-src/config/*.yaml text eol=lf
+src/data/**/*.jsonl text eol=lf
+src/data/eval/labels_*.json text eol=lf
